@@ -1,5 +1,6 @@
 import random
 import time
+from collections import deque
 
 gameover = False
 end_time = None
@@ -22,9 +23,13 @@ row_masks = [0xFF << (i * board_depth) for i in range(8)]
 # G 48 49 50 51 52 53 54 55
 # H 56 57 58 59 60 61 62 63
 
+moves_set = set()
+
 def start_game(humanFirst:bool, thinkTimeInSeconds:int) -> None:
-    global bitboards
+    global bitboards, moves_set
     bitboards["ai"] = bitboards["human"] = 0
+    moves_set = set()
+
     print("\nGame Started!\n")
     print_board()
     if humanFirst:
@@ -91,12 +96,13 @@ def alpha_beta_pruning(a:int, b:int, maxDepth:int) -> tuple[int, int]:
     return bestScore, bestMove
 
 def MAX(a:int, b:int, depth:int) -> int:
-    eval = eval_func()
-    if eval != 0:
-        return eval
+    if isWin("ai"):
+        return 20000
+    if isWin("human"):
+        return -20000
     
     if depth == 0 or len(generate_successors()) == 0:
-        return eval
+        return eval_func("ai")
 
     bestScore = float('-inf')
     
@@ -111,12 +117,13 @@ def MAX(a:int, b:int, depth:int) -> int:
     return bestScore
 
 def MIN(a:int, b:int, depth:int) -> int:
-    eval = eval_func()
-    if eval != 0:
-        return eval
+    if isWin("human"):
+        return -20000
+    if isWin("ai"):
+        return 20000
     
     if depth == 0 or len(generate_successors()) == 0:
-        return eval_func()
+        return -eval_func("human")
 
     bestScore = float('inf')
 
@@ -130,13 +137,29 @@ def MIN(a:int, b:int, depth:int) -> int:
             return bestScore
     return bestScore
 
-def eval_func():
-    if isWin("ai"):
-        return 5000
-    if isWin("human"):
-        return -5000
-    # 1 for draw
-    # 
+def eval_func(player:str):
+    num_consec = num_consecutive_pieces(player)
+    match num_consec:
+        case 2:
+            return 200
+        case 3:
+            return 300
+    return 0
+
+def num_consecutive_pieces(player:str):
+    count = 0
+    if isWin(player): return 4
+    for i in range(8):
+        row = bitboards[player] & row_masks[i]
+        if row & row >> 1 & row >> 2 != 0: return 3 
+        if row & row >> 1 != 0: return 2
+        if row != 0: return 1
+
+        # checking each col for a connect 4
+        col = bitboards[player] & col_masks[i]
+        if col & col >> 1*board_depth & col >> 2*board_depth != 0: return 3
+        if col & col >> 1*board_depth != 0: return 2
+        if col != 0: return 1
     return 0
 
 def isWin(currPlayer:str):    
@@ -185,27 +208,41 @@ def human_move():
 def make_move(row:int, col:int, currPlayer):
     # sets the bit
     bitboards[currPlayer] |= (1 << col + row*board_depth)
+    moves_set.add((row,col))
 
 def undo_move(row: int, col:int, currPlayer):
     # clears the bit
     bitboards[currPlayer] &= ~(1 << col + row*board_depth)
+    moves_set.remove((row,col))
 
 def isMoveTaken(row:int, col:int) -> bool:
-    combined_board = bitboards['ai'] | bitboards['human']
-    return (combined_board >> col + row*board_depth) & 1
+    return (row, col) in moves_set
 
 def generate_successors():
-    # maybe get high priority successors first, aka any adjacent squares
-    # the more pieces they are touching the higher priority they are
-    # then randomize the rest
+    # gives priority to adjacent squares
+
+    priority = set()
+    # add all adjacent squares
+    for x, y in moves_set:
+        adj = []
+        adj.append((x-1, y)) #left
+        adj.append((x+1, y)) #right
+        adj.append((x, y+1)) #up
+        adj.append((x, y-1)) #down
+        for i, j in adj:
+            if 0 <= i < 8 and 0 <= j < 8 and not isMoveTaken(i,j):
+                priority.add((i, j))
     successors = []
+
+    # add the rest
     for i in range(8):
         for j in range(8):
-            if not isMoveTaken(i,j):
+            if not isMoveTaken(i,j) and not (i, j) in priority:
                 successors.append((i, j))
     random.shuffle(successors)
-    return successors
+
+    return [*priority, *successors]
 
 # note to self
-# continue making eval func
-# make successor function better; prioritize all the rows or cols with more pieces placed
+#add points based on how many in a row
+#add points to blocking
