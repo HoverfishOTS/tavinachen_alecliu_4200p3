@@ -6,7 +6,7 @@ from game import start_game
 humanFirst = True
 thinkTimeInSeconds = 5
 maxThinkTimeInSeconds = 30
-minThinkTimeInSeconds = 5
+minThinkTimeInSeconds = 1
 
 def main() -> None:
     print("CS4200 Project 3: 4-in-a-line")
