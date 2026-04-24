@@ -2,33 +2,59 @@ import random
 import time
 from collections import deque
 
-gameover = False
+BOARD_DEPTH = 8
+
+# an empty board is all the bits set to 0
+EMPTY_BOARD = 0
+# 0xFFFFFFFFFFFFFFFF is a special number that sets all 64 bits into 1
+FULL_BOARD = 0xFFFFFFFFFFFFFFFF
+# 0x0101010101010101 is a special number that selects every 8 bits, making a column selection starting from 0
+COL_0_MASK = 0x0101010101010101
+# 0x00000000000000FF is a special number that selects bits 0-7, making a row
+ROW_0_MASK = 0x00000000000000FF
+
+# shifting it 7 times yields the last column
+COL_7_MASK = COL_0_MASK << 7
+
+CENTER2X2_MASK = (( (COL_0_MASK << 4) | 
+                   (COL_0_MASK << 5)) & 
+                   ((ROW_0_MASK << 4*BOARD_DEPTH) |
+                    (ROW_0_MASK << 5*BOARD_DEPTH))) 
+
+CENTER4X4RING_MASK = (((COL_0_MASK << 2) | 
+                   (COL_0_MASK << 3)) & 
+                   ((ROW_0_MASK << 2*BOARD_DEPTH) |
+                    (ROW_0_MASK << 3*BOARD_DEPTH)))
+
+# this maps each index of the bitboard, giving priority to center moves
+INDEX_PRIORITY_MAP = [
+    0, 0, 0, 0, 0, 0, 0, 0, # A  0  1  2  3  4  5  6  7
+    0, 1, 1, 1, 1, 1, 1, 0, # B  8  9 10 11 12 13 14 15
+    0, 1, 2, 2, 2, 2, 1, 0, # C 16 17 18 19 20 21 22 23
+    0, 1, 2, 3, 3, 2, 1, 0, # D 24 25 26 27 28 29 30 31
+    0, 1, 2, 3, 3, 2, 1, 0, # E 32 33 34 35 36 37 38 39
+    0, 1, 2, 2, 2, 2, 1, 0, # F 40 41 42 43 44 45 46 47
+    0, 1, 1, 1, 1, 1, 1, 0, # G 48 49 50 51 52 53 54 55
+    0, 0, 0, 0, 0, 0, 0, 0, # H 56 57 58 59 60 61 62 63
+]
+
+FOUR_IN_A_ROW = 9999999999
+OPEN_THREE = 50000
+POTENTIAL_FOUR = 10000
+OPEN_TWO = 1000
+POTENTIAL_THREE = 500
+CENTER_BONUS = 20
+CENTER_RING_BONUS = 10
+
+AI = 0
+HUMAN = 1
+
+bitboards = [0, 0]
 end_time = None
 
-bitboards = {}
-board_depth = 8
-
-# 0x0101010101010101 is a special number that selects every 8 bits, making a column selection
-col_masks = [0x0101010101010101 << i for i in range(8)] 
-
-# 0xFF is a special number that selects the bits 0-7
-row_masks = [0xFF << (i * board_depth) for i in range(8)]
-
-# A  0  1  2  3  4  5  6  7
-# B  8  9 10 11 12 13 14 15
-# C 16 17 18 19 20 21 22 23
-# D 24 25 26 27 28 29 30 31
-# E 32 33 34 35 36 37 38 39
-# F 40 41 42 43 44 45 46 47
-# G 48 49 50 51 52 53 54 55
-# H 56 57 58 59 60 61 62 63
-
-moves_set = set()
-
 def start_game(humanFirst:bool, thinkTimeInSeconds:int) -> None:
-    global bitboards, moves_set
-    bitboards["ai"] = bitboards["human"] = 0
-    moves_set = set()
+    global bitboards
+    bitboards = [0, 0]
 
     print("\nGame Started!\n")
     print_board()
@@ -39,31 +65,29 @@ def start_game(humanFirst:bool, thinkTimeInSeconds:int) -> None:
         ai_move(thinkTimeInSeconds)
         if isGameOver(): break
         human_move()
-    
-    print("Game Over!\n")
 
 def print_board() -> None:
-    print("  1 2 3 4 5 6 7 8")
-    for row in range(8):
-        r = []
-        for col in range(8):
-            if (bitboards['ai'] >> col + row*board_depth) & 1:
-                r.append("X")
-            elif (bitboards['human'] >> col + row*board_depth) & 1:
-                r.append("O")
-            else:
-                r.append("-")
-
-        print(chr(ord('A')+row), " ".join(r))
+    print("\n  1 2 3 4 5 6 7 8", end="")
+    row = 0
+    for i in range(64):
+        if i % 8 == 0:
+            print(f"\n{chr(ord('A')+row)}", end="")
+            row+=1
+        if (bitboards[AI] >> i) & 1:
+            print(f" X", end="")
+        elif (bitboards[HUMAN] >> i) & 1:
+            print(f" O" , end="")
+        else:
+            print(f" -", end="")
+    print()
 
 def ai_move(thinkTimeInSeconds: int):
     global end_time
-    print("\nAI thinking...")
-
     depth = 1
     bestMove = None
     bestScore = float('-inf')
 
+    print("\nAI thinking...")
     end_time = time.time() + thinkTimeInSeconds
 
     while time.time() < end_time:
@@ -72,118 +96,143 @@ def ai_move(thinkTimeInSeconds: int):
             bestScore = score
             bestMove = move
         depth +=1
-    make_move(bestMove[0], bestMove[1], "ai")
-    col = chr(bestMove[0] + ord('a')).upper()
-    row = bestMove[1] + 1
+    make_move(bestMove, AI)
+    col = chr(bestMove%8 + ord('a')).upper()
+    row = bestMove//8 + 1
     print(f"\nAI chose: {col}{row}")
-    # print("Start Time: ", start_time)
-    # print("End Time: ", time.time())
     print_board()
 
 def alpha_beta_pruning(a:int, b:int, maxDepth:int) -> tuple[int, int]:
     bestScore = float('-inf')
     bestMove = None
 
-    for x, y in generate_successors():
-        make_move(x, y, "ai")
+    for i in generate_successors():
+        make_move(i, AI)
         score = MIN(a, b, maxDepth-1)
-        undo_move(x, y, "ai")
+        undo_move(i, AI)
         if score > bestScore:
             bestScore = score
-            bestMove = (x, y)
+            bestMove = i
         if time.time() > end_time:
             break
     return bestScore, bestMove
 
 def MAX(a:int, b:int, depth:int) -> int:
-    if isWin("ai"):
-        return 20000
-    if isWin("human"):
-        return -20000
+    curr_score = eval_func()
+
+    # terminal state
+    if curr_score == FOUR_IN_A_ROW:
+        return curr_score
     
+    # cut off test
     if depth == 0 or len(generate_successors()) == 0:
-        return eval_func("ai")
+        return curr_score
 
     bestScore = float('-inf')
-    
-    for x, y in generate_successors():
-        make_move(x, y, "ai")
+    for move in generate_successors():
+        make_move(move, AI)
         score = MIN(a, b, depth-1)
         bestScore = max(score, bestScore)
         a = max(a, bestScore)
-        undo_move(x, y, "ai")
+        undo_move(move, AI)
         if bestScore>= b or time.time() > end_time:
             return bestScore
     return bestScore
 
 def MIN(a:int, b:int, depth:int) -> int:
-    if isWin("human"):
-        return -20000
-    if isWin("ai"):
-        return 20000
-    
+
+    curr_score = eval_func()
+
+    # terminal state
+    if curr_score == FOUR_IN_A_ROW:
+        return curr_score
+
+    # cut off test
     if depth == 0 or len(generate_successors()) == 0:
-        return -eval_func("human")
+        return curr_score
 
     bestScore = float('inf')
-
-    for x, y in generate_successors():
-        make_move(x, y, "human")
+    for move in generate_successors():
+        make_move(move, HUMAN)
         score = MAX(a, b, depth-1)
         bestScore = min(score, bestScore)        
         b = min(b, bestScore)
-        undo_move(x, y ,"human")
+        undo_move(move, HUMAN)
         if bestScore<= a or time.time() > end_time:
             return bestScore
     return bestScore
 
-def eval_func(player:str):
-    num_consec = num_consecutive_pieces(player)
-    match num_consec:
-        case 2:
-            return 200
-        case 3:
-            return 300
-    return 0
-
-def num_consecutive_pieces(player:str):
-    count = 0
-    if isWin(player): return 4
-    for i in range(8):
-        row = bitboards[player] & row_masks[i]
-        if row & row >> 1 & row >> 2 != 0: return 3 
-        if row & row >> 1 != 0: return 2
-        if row != 0: return 1
-
-        # checking each col for a connect 4
-        col = bitboards[player] & col_masks[i]
-        if col & col >> 1*board_depth & col >> 2*board_depth != 0: return 3
-        if col & col >> 1*board_depth != 0: return 2
-        if col != 0: return 1
-    return 0
-
-def isWin(currPlayer:str):    
-    for i in range(8):
-        # checking each row for a connect 4
-        row = bitboards[currPlayer] & row_masks[i]
-        if row & row >> 1 & row >> 2 & row >> 3 != 0: return True 
-
-        # checking each col for a connect 4
-        col = bitboards[currPlayer] & col_masks[i]
-        if col & col >> 1*board_depth & col >> 2*board_depth & col >> 3*board_depth != 0: return True
-
-    return False
-
 def isGameOver():
-    if isWin('ai'):
-        print("\nYou Lose!")
+    occupied = bitboards[AI] | bitboards[HUMAN]
+    if occupied == FULL_BOARD:
+        print("\nIt's A Tie!\n")
+        print("Game Over!\n")
         return True
-    if isWin('human'):
-        print("\nYou Win!")
+    if score(AI) == FOUR_IN_A_ROW:
+        print("\nYou Lose!\n")
+        print("Game Over!\n")
         return True
-    
+    if score(HUMAN) == FOUR_IN_A_ROW:
+        print("\nYou Win!\n")
+        print("Game Over!\n")
+        return True
     return False
 
+def eval_func():
+    ai_score = score(AI)
+    if ai_score == FOUR_IN_A_ROW: return FOUR_IN_A_ROW
+    human_score = score(HUMAN)
+    if human_score == FOUR_IN_A_ROW: return FOUR_IN_A_ROW
+
+    return ai_score - human_score
+
+def score(player):
+    score = 0
+    directions = {'horizontal':(1, ~COL_0_MASK), 'vertical':(BOARD_DEPTH, FULL_BOARD)}
+    unoccupied = ~(bitboards[AI] | bitboards[HUMAN]) & FULL_BOARD
+
+    for shift_amount, mask in directions.values():
+
+        #detect consecutive pieces
+        two_in_a_row = bitboards[player] & (bitboards[player] >> shift_amount) & mask
+        three_in_a_row = two_in_a_row & (bitboards[player] >> shift_amount*2) & mask
+        if three_in_a_row & (bitboards[player] >> shift_amount*3) & mask:
+            return FOUR_IN_A_ROW
+
+        #detect potential 4s [- X X X], [X - X X], [X X - X], [X X X -]
+        potential_four_left = (three_in_a_row << shift_amount) & unoccupied & mask
+        potential_four_right = (three_in_a_row << shift_amount*3) & unoccupied
+        if shift_amount == 1:
+            potential_four_right & (COL_7_MASK  | COL_7_MASK >> 1 | COL_7_MASK >> 2)
+        #detect open three [- X X X -]
+        open_three = potential_four_right & potential_four_left
+
+        # tally up 3 in a row scores
+        score += bin(open_three).count('1') * OPEN_THREE
+        score += (bin(potential_four_left).count('1') + 
+                  bin(potential_four_right).count('1')) * POTENTIAL_FOUR
+
+        #detect potential 3s [- X X], [X - X], [X X -]
+        potential_three_left = (two_in_a_row << shift_amount) & unoccupied & mask
+        potential_three_right = (two_in_a_row << shift_amount*2) & unoccupied
+        if shift_amount == 1:
+            potential_three_right & (COL_7_MASK  | COL_7_MASK >> 1)
+        #detect open two [- X X -]
+        open_two = potential_three_left & potential_three_right
+
+        # tally up 2 in a row scores
+        score += bin(open_two).count('1') * OPEN_TWO
+        score += (bin(potential_three_left).count('1') + 
+                  bin(potential_three_right).count('1')) * POTENTIAL_THREE
+    
+    #add bonus for central placements
+    center = bitboards[player] & CENTER2X2_MASK
+    center_ring = bitboards[player] & CENTER4X4RING_MASK
+
+    score += bin(center).count('1')*CENTER_BONUS
+    score += bin(center_ring).count('1')*CENTER_RING_BONUS
+
+    return score
 
 def human_move():
     while True: 
@@ -192,57 +241,46 @@ def human_move():
             and ('a' <= humanMove[0].lower() <= 'h') 
             and ('1' <= humanMove[1] <= '8')):
 
-            row = ord(humanMove[0].lower()) - ord('a')
-            col = int(humanMove[1])-1
-
-            if isMoveTaken(row, col):
+            row = ord(humanMove[0].lower()) - ord('a') # 0 indexed row
+            col = int(humanMove[1])-1 # 0 indexed column
+            index = col + row*BOARD_DEPTH
+            if isMoveTaken(index):
                 print("Move already taken!")
                 continue
 
-            make_move(row, col, "human")
+            make_move(index, HUMAN)
             print_board()
             break
         else: 
             print("Invalid Move")
 
-def make_move(row:int, col:int, currPlayer):
+def make_move(index:int, player):
     # sets the bit
-    bitboards[currPlayer] |= (1 << col + row*board_depth)
-    moves_set.add((row,col))
+    bitboards[player] |= (1 << index) # bit shifts a 1 to the correct index, then OR with bitboard to add it 
 
-def undo_move(row: int, col:int, currPlayer):
+def undo_move(index:int, player):
     # clears the bit
-    bitboards[currPlayer] &= ~(1 << col + row*board_depth)
-    moves_set.remove((row,col))
+    bitboards[player] ^= (1 << index) # bit shifts a 1 to the correct index, then XOR to remove bit 
 
-def isMoveTaken(row:int, col:int) -> bool:
-    return (row, col) in moves_set
+def isMoveTaken(index:int) -> bool:
+    occupied = bitboards[AI] | bitboards[HUMAN]
+    return (occupied >> index) & 1
 
 def generate_successors():
-    # gives priority to adjacent squares
+    occupied = bitboards[AI] | bitboards[HUMAN]
+    empty_squares = FULL_BOARD & ~occupied #all empty squares are marked with a 1 bit
 
-    priority = set()
-    # add all adjacent squares
-    for x, y in moves_set:
-        adj = []
-        adj.append((x-1, y)) #left
-        adj.append((x+1, y)) #right
-        adj.append((x, y+1)) #up
-        adj.append((x, y-1)) #down
-        for i, j in adj:
-            if 0 <= i < 8 and 0 <= j < 8 and not isMoveTaken(i,j):
-                priority.add((i, j))
     successors = []
 
-    # add the rest
-    for i in range(8):
-        for j in range(8):
-            if not isMoveTaken(i,j) and not (i, j) in priority:
-                successors.append((i, j))
-    random.shuffle(successors)
+    while empty_squares:
+        lsb = empty_squares & -empty_squares #2's complement isolates lsb
 
-    return [*priority, *successors]
+        index = lsb.bit_length() - 1
+        successors.append(index)
 
-# note to self
-#add points based on how many in a row
-#add points to blocking
+        empty_squares ^= lsb # use XOR to cancel out the overlaping lsb
+
+    #sorts the successors by each square's priority 
+    successors.sort(key=lambda index: INDEX_PRIORITY_MAP[index], reverse=True)
+
+    return successors
