@@ -3,25 +3,29 @@
 
 from game import start_game
 
+# default values
 humanFirst = True
 thinkTimeInSeconds = 5
 maxThinkTimeInSeconds = 30
-minThinkTimeInSeconds = 1
+minThinkTimeInSeconds = 5
 
 def main() -> None:
     print("CS4200 Project 3: 4-in-a-line")
 
+    # starts and continues the game
     while True:
         selection_prompt()
         start_game(humanFirst, thinkTimeInSeconds)
         if not is_yes("Would you like to play again? (y/n): "):
             break
-    
+
+# this method prompts the user for their preferences for the game
 def selection_prompt() -> None:
-    global humanFirst, thinkTimeInSeconds, maxThinkTimeInSeconds, minThinkTimeInSeconds
+    global humanFirst, thinkTimeInSeconds
 
     humanFirst = is_yes("Would you like to go first? (y/n): ")
 
+    # prompt and validates integer input for ai think time
     while True:
         try:
             thinkTimeInSeconds = int(input("How long should the computer think about its moves (in seconds)?: "))
@@ -32,6 +36,7 @@ def selection_prompt() -> None:
         except ValueError:
             print("Please input integers only")
     
+# this method validates yes and no question inputs
 def is_yes(text) -> bool:
     while True: 
         yes = input(text)
