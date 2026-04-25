@@ -148,7 +148,7 @@ def MAX(a:int, b:int, depth:int) -> int:
     moves = generate_moves()
 
     # cut off test
-    if depth == len(moves) == 0:
+    if depth == 0 or len(moves) == 0:
         return eval_func()
 
     bestScore = float('-inf')
@@ -179,7 +179,7 @@ def MIN(a:int, b:int, depth:int) -> int:
     moves = generate_moves()
     
     # cut off test
-    if depth == len(moves) == 0:
+    if depth == 0 or len(moves) == 0:
         return eval_func()
 
     bestScore = float('inf')
