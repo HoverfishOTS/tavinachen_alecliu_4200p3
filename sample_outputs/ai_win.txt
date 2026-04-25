@@ -1,0 +1,217 @@
+CS4200 Project 3: 4-in-a-line
+Would you like to go first? (y/n): n
+How long should the computer think about its moves (in seconds)?: 5
+
+Game Started!
+
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - - - - -
+C - - - - - - - -
+D - - - - - - - -
+E - - - - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+AI thinking...
+
+AI chose: D5
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - - - - -
+C - - - - - - - -
+D - - - - X - - -
+E - - - - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Choose your next move: D4
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - - - - -
+C - - - - - - - -
+D - - - O X - - -
+E - - - - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+AI thinking...
+
+AI chose: E5
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - - - - -
+C - - - - - - - -
+D - - - O X - - -
+E - - - - X - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Choose your next move: F5
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - - - - -
+C - - - - - - - -
+D - - - O X - - -
+E - - - - X - - -
+F - - - - O - - -
+G - - - - - - - -
+H - - - - - - - -
+
+AI thinking...
+
+AI chose: C5
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - - - - -
+C - - - - X - - -
+D - - - O X - - -
+E - - - - X - - -
+F - - - - O - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Choose your next move: B5
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - O - - -
+C - - - - X - - -
+D - - - O X - - -
+E - - - - X - - -
+F - - - - O - - -
+G - - - - - - - -
+H - - - - - - - -
+
+AI thinking...
+
+AI chose: E4
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - O - - -
+C - - - - X - - -
+D - - - O X - - -
+E - - - X X - - -
+F - - - - O - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Choose your next move: E6
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - O - - -
+C - - - - X - - -
+D - - - O X - - -
+E - - - X X O - -
+F - - - - O - - -
+G - - - - - - - -
+H - - - - - - - -
+
+AI thinking...
+
+AI chose: C3
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - O - - -
+C - - X - X - - -
+D - - - O X - - -
+E - - - X X O - -
+F - - - - O - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Choose your next move: C4
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - O - - -
+C - - X O X - - -
+D - - - O X - - -
+E - - - X X O - -
+F - - - - O - - -
+G - - - - - - - -
+H - - - - - - - -
+
+AI thinking...
+
+AI chose: E3
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - O - - -
+C - - X O X - - -
+D - - - O X - - -
+E - - X X X O - -
+F - - - - O - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Choose your next move: E2
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - O - - -
+C - - X O X - - -
+D - - - O X - - -
+E - O X X X O - -
+F - - - - O - - -
+G - - - - - - - -
+H - - - - - - - -
+
+AI thinking...
+
+AI chose: D3
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - O - - -
+C - - X O X - - -
+D - - X O X - - -
+E - O X X X O - -
+F - - - - O - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Choose your next move: B3
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - O - O - - -
+C - - X O X - - -
+D - - X O X - - -
+E - O X X X O - -
+F - - - - O - - -
+G - - - - - - - -
+H - - - - - - - -
+
+AI thinking...
+
+AI chose: F3
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - O - O - - -
+C - - X O X - - -
+D - - X O X - - -
+E - O X X X O - -
+F - - X - O - - -
+G - - - - - - - -
+H - - - - - - - -
+
+You Lose!
+Game Over!
+
+Would you like to play again? (y/n): n
