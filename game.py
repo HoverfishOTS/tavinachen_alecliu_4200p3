@@ -8,6 +8,8 @@ from time import time
 bitboards = [0, 0]
 end_time = None
 tt = {} # transposition table for move ordering
+history_heuristic = [[0] * 64, [0] * 64]
+killer_moves = [[-1, -1] for _ in range(64)]
 
 # used for bit shifts to check pieces in a row for vertical and horizontal directions 
 BOARD_DEPTH = 8
@@ -71,9 +73,11 @@ INDEX_PRIORITY_MAP = [
 # this methods initializes the game and prompts the user until either the AI or player wins.
 def start_game(humanFirst:bool, thinkTimeInSeconds:int) -> None:
     # game set up
-    global bitboards, FEAR_FACTOR, tt
+    global bitboards, FEAR_FACTOR, tt, history_heuristic, killer_moves
     bitboards = [0, 0]
     tt = {} # clear transposition table for new game
+    history_heuristic = [[0] * 64, [0] * 64]
+    killer_moves = [[-1, -1] for _ in range(64)]
     print("\nGame Started!\n")
     print_board()
 
@@ -141,7 +145,7 @@ def alpha_beta_pruning(a:int, b:int, maxDepth:int, prevBestMove=None) -> int:
     for move in moves:
         #perform move to calculate potential score
         make_move(move, AI)
-        score = MIN(a, b, maxDepth-1, 1)
+        score = MIN(a, b, maxDepth-1, 1, False)
         undo_move(move, AI)
 
         # update if score is better than a previous move
@@ -157,7 +161,7 @@ def alpha_beta_pruning(a:int, b:int, maxDepth:int, prevBestMove=None) -> int:
     return bestMove
 
 # the AI in the minimax algorithm
-def MAX(a:int, b:int, depth:int, ply:int) -> int:
+def MAX(a:int, b:int, depth:int, ply:int, is_null_move=False) -> int:
     original_a = a
     # terminal state
     isTerminal = isWin()
@@ -187,10 +191,30 @@ def MAX(a:int, b:int, depth:int, ply:int) -> int:
             if a >= b:
                 return eval_score
 
+    # Null Move Pruning
+    R = 2
+    if depth >= 3 and not is_null_move:
+        score = MIN(a, b, depth - 1 - R, ply + 1, is_null_move=True)
+        if score >= b:
+            return score
+
     moves = generate_moves()
+    
+    # Sort by history heuristic
+    moves.sort(key=lambda m: history_heuristic[AI][m], reverse=True)
+    
+    ordered_moves = []
     if tt_move is not None and tt_move in moves:
+        ordered_moves.append(tt_move)
         moves.remove(tt_move)
-        moves.insert(0, tt_move)
+        
+    for k_move in killer_moves[depth]:
+        if k_move != -1 and k_move in moves:
+            ordered_moves.append(k_move)
+            moves.remove(k_move)
+            
+    ordered_moves.extend(moves)
+    moves = ordered_moves
 
     # cut off test
     if depth == 0 or len(moves) == 0:
@@ -201,17 +225,24 @@ def MAX(a:int, b:int, depth:int, ply:int) -> int:
     for move in moves:
         # get score for this move
         make_move(move, AI)
-        score = MIN(a, b, depth-1, ply+1)
+        score = MIN(a, b, depth-1, ply+1, False)
         undo_move(move, AI)
 
         # update values
         if score > bestScore:
             bestScore = score
             bestMove = move
+            if not is_null_move:
+                history_heuristic[AI][move] += depth * depth
+                
         a = max(a, bestScore)
 
         # pruning or timeout
-        if bestScore>= b or time() > end_time:
+        if bestScore >= b or time() > end_time:
+            if time() <= end_time and not is_null_move:
+                if killer_moves[depth][0] != move:
+                    killer_moves[depth][1] = killer_moves[depth][0]
+                    killer_moves[depth][0] = move
             break
 
     if time() <= end_time and bestMove is not None:
@@ -234,7 +265,7 @@ def MAX(a:int, b:int, depth:int, ply:int) -> int:
     return bestScore
 
 # the human in the minimax algorithm
-def MIN(a:int, b:int, depth:int, ply:int) -> int:
+def MIN(a:int, b:int, depth:int, ply:int, is_null_move=False) -> int:
     original_b = b
     # terminal state
     isTerminal = isWin()
@@ -264,10 +295,30 @@ def MIN(a:int, b:int, depth:int, ply:int) -> int:
             if a >= b:
                 return eval_score
 
+    # Null Move Pruning
+    R = 2
+    if depth >= 3 and not is_null_move:
+        score = MAX(a, b, depth - 1 - R, ply + 1, is_null_move=True)
+        if score <= a:
+            return score
+
     moves = generate_moves()
+    
+    # Sort by history heuristic
+    moves.sort(key=lambda m: history_heuristic[HUMAN][m], reverse=True)
+    
+    ordered_moves = []
     if tt_move is not None and tt_move in moves:
+        ordered_moves.append(tt_move)
         moves.remove(tt_move)
-        moves.insert(0, tt_move)
+        
+    for k_move in killer_moves[depth]:
+        if k_move != -1 and k_move in moves:
+            ordered_moves.append(k_move)
+            moves.remove(k_move)
+            
+    ordered_moves.extend(moves)
+    moves = ordered_moves
     
     # cut off test
     if depth == 0 or len(moves) == 0:
@@ -278,17 +329,24 @@ def MIN(a:int, b:int, depth:int, ply:int) -> int:
     for move in moves:
         # get score for this move
         make_move(move, HUMAN)
-        score = MAX(a, b, depth-1, ply+1)
+        score = MAX(a, b, depth-1, ply+1, False)
         undo_move(move, HUMAN)
 
         # update values
         if score < bestScore:
             bestScore = score
             bestMove = move
+            if not is_null_move:
+                history_heuristic[HUMAN][move] += depth * depth
+                
         b = min(b, bestScore)
 
-        #purning or timeout
-        if bestScore<= a or time() > end_time:
+        # pruning or timeout
+        if bestScore <= a or time() > end_time:
+            if time() <= end_time and not is_null_move:
+                if killer_moves[depth][0] != move:
+                    killer_moves[depth][1] = killer_moves[depth][0]
+                    killer_moves[depth][0] = move
             break
 
     if time() <= end_time and bestMove is not None:

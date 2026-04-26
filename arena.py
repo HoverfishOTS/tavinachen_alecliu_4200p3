@@ -71,6 +71,7 @@ def main():
     print(f"Think time: {think_time} seconds per move")
     print_board(bitboards)
     
+    move_history = []
     turn = 0
     while True:
         # Check win using the new game module's logic
@@ -113,12 +114,19 @@ def main():
             
         row = chr(move // 8 + ord('a')).upper()
         col = move % 8 + 1
-        print(f"{player_label} played {row}{col}")
+        move_str = f"{player_label} played {row}{col}"
+        print(move_str)
+        move_history.append(move_str)
             
         # Apply move
         bitboards[current_player] |= (1 << move)
         print_board(bitboards)
         turn += 1
+        
+    print("\n--- Move List for Analyzer ---")
+    for move_str in move_history:
+        print(move_str)
+    print("------------------------------")
 
 if __name__ == '__main__':
     main()
