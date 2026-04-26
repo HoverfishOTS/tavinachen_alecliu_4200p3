@@ -7,6 +7,7 @@ from time import time
 # gameboard and timer
 bitboards = [0, 0]
 end_time = None
+tt = {} # transposition table for move ordering
 
 # used for bit shifts to check pieces in a row for vertical and horizontal directions 
 BOARD_DEPTH = 8
@@ -30,13 +31,25 @@ FEAR_FACTOR = 1.5 # higher value = more defensive
 FULL_BOARD = 0xFFFFFFFFFFFFFFFF # sets all 64 bits into 1
 COL_0_MASK = 0x0101010101010101 # selects every 8 bits, selecting col 0
 L_SHIFT_MASK = ~COL_0_MASK & FULL_BOARD # cuts off overflow in col 0 for left 1 bit shift
-L_SHIFT2_MASK = L_SHIFT_MASK & (~COL_0_MASK << 1) # cuts off overflow in col 0, 1 for left 2 bit shift
-L_SHIFT3_MASK = L_SHIFT2_MASK & (~COL_0_MASK << 2) # cuts off overflow in col 0, 1, 2 for left 3 bit shift
 R_SHIFT_MASK = ~(COL_0_MASK << 7) & FULL_BOARD # cuts off overflow in col 7 for right 1 bit shift
+L_SHIFT3_MASK = (~COL_0_MASK & FULL_BOARD) & (~COL_0_MASK << 1) & (~COL_0_MASK << 2) # cuts off overflow in col 0, 1, 2 for left 3 bit shift
 CENTER2X2_MASK = ((1 << 27) | (1 << 28) | (1 << 35) | (1 << 36))
 CENTER4X4RING_MASK = ((1 << 18) | (1 << 19) | (1 << 20) | (1 << 21) |
                       (1 << 26) | (1 << 29) | (1 << 34) | (1 << 37) | 
                       (1 << 42) | (1 << 43) | (1 << 44) | (1 << 45)) 
+
+# Precalculate the 80 winning lines (windows) of length 4
+WINDOWS = []
+for r in range(8):
+    for c in range(5):
+        w = 0
+        for i in range(4): w |= (1 << (r * 8 + c + i))
+        WINDOWS.append(w)
+for c in range(8):
+    for r in range(5):
+        w = 0
+        for i in range(4): w |= (1 << ((r + i) * 8 + c))
+        WINDOWS.append(w)
 
 # maps each index of the bitboard to a priority based on how far it is from the edges
 INDEX_PRIORITY_MAP = [
@@ -58,8 +71,9 @@ INDEX_PRIORITY_MAP = [
 # this methods initializes the game and prompts the user until either the AI or player wins.
 def start_game(humanFirst:bool, thinkTimeInSeconds:int) -> None:
     # game set up
-    global bitboards, FEAR_FACTOR
+    global bitboards, FEAR_FACTOR, tt
     bitboards = [0, 0]
+    tt = {} # clear transposition table for new game
     print("\nGame Started!\n")
     print_board()
 
@@ -101,7 +115,7 @@ def ai_move(thinkTimeInSeconds: int) -> None:
 
     # ai performs alpha beta pruning with IDFS until time is up
     while depth < 64 and time() <= end_time:
-        move = alpha_beta_pruning(float('-inf'), float('inf'), depth)
+        move = alpha_beta_pruning(float('-inf'), float('inf'), depth, bestMove)
         depth +=1
         # only update bestScore if AI is done searching at x depth
         if time() < end_time:
@@ -115,14 +129,19 @@ def ai_move(thinkTimeInSeconds: int) -> None:
     print_board()
 
 # performs alpha beta pruning and returns the best calculated move
-def alpha_beta_pruning(a:int, b:int, maxDepth:int) -> int:
+def alpha_beta_pruning(a:int, b:int, maxDepth:int, prevBestMove=None) -> int:
     bestScore = float('-inf')
     bestMove = None
 
-    for move in generate_moves():
+    moves = generate_moves()
+    if prevBestMove is not None and prevBestMove in moves:
+        moves.remove(prevBestMove)
+        moves.insert(0, prevBestMove)
+
+    for move in moves:
         #perform move to calculate potential score
         make_move(move, AI)
-        score = MIN(a, b, maxDepth-1)
+        score = MIN(a, b, maxDepth-1, 1)
         undo_move(move, AI)
 
         # update if score is better than a previous move
@@ -138,64 +157,155 @@ def alpha_beta_pruning(a:int, b:int, maxDepth:int) -> int:
     return bestMove
 
 # the AI in the minimax algorithm
-def MAX(a:int, b:int, depth:int) -> int:
-
+def MAX(a:int, b:int, depth:int, ply:int) -> int:
+    original_a = a
     # terminal state
     isTerminal = isWin()
     if isTerminal != 0:
-        return isTerminal
+        return isTerminal - ply if isTerminal > 0 else isTerminal + ply
     
+    state_key = (bitboards[0], bitboards[1], AI)
+    tt_move = None
+    if state_key in tt:
+        tt_depth, tt_flag, tt_score, tt_move = tt[state_key]
+        
+        # Un-normalize mate scores from TT
+        if tt_score > FOUR_IN_A_ROW - 1000:
+            eval_score = tt_score - ply
+        elif tt_score < -FOUR_IN_A_ROW + 1000:
+            eval_score = tt_score + ply
+        else:
+            eval_score = tt_score
+
+        if tt_depth >= depth:
+            if tt_flag == 'EXACT':
+                return eval_score
+            elif tt_flag == 'LOWERBOUND':
+                a = max(a, eval_score)
+            elif tt_flag == 'UPPERBOUND':
+                b = min(b, eval_score)
+            if a >= b:
+                return eval_score
+
     moves = generate_moves()
+    if tt_move is not None and tt_move in moves:
+        moves.remove(tt_move)
+        moves.insert(0, tt_move)
 
     # cut off test
     if depth == 0 or len(moves) == 0:
         return eval_func()
 
     bestScore = float('-inf')
+    bestMove = None
     for move in moves:
         # get score for this move
         make_move(move, AI)
-        score = MIN(a, b, depth-1)
+        score = MIN(a, b, depth-1, ply+1)
         undo_move(move, AI)
 
         # update values
-        bestScore = max(score, bestScore)
+        if score > bestScore:
+            bestScore = score
+            bestMove = move
         a = max(a, bestScore)
 
         # pruning or timeout
         if bestScore>= b or time() > end_time:
             break
 
+    if time() <= end_time and bestMove is not None:
+        if bestScore <= original_a:
+            flag = 'UPPERBOUND'
+        elif bestScore >= b:
+            flag = 'LOWERBOUND'
+        else:
+            flag = 'EXACT'
+            
+        # Normalize mate scores before storing
+        store_score = bestScore
+        if store_score > FOUR_IN_A_ROW - 1000:
+            store_score += ply
+        elif store_score < -FOUR_IN_A_ROW + 1000:
+            store_score -= ply
+
+        tt[state_key] = (depth, flag, store_score, bestMove)
+
     return bestScore
 
 # the human in the minimax algorithm
-def MIN(a:int, b:int, depth:int) -> int:
-
+def MIN(a:int, b:int, depth:int, ply:int) -> int:
+    original_b = b
     # terminal state
     isTerminal = isWin()
     if isTerminal != 0:
-        return isTerminal
+        return isTerminal - ply if isTerminal > 0 else isTerminal + ply
     
+    state_key = (bitboards[0], bitboards[1], HUMAN)
+    tt_move = None
+    if state_key in tt:
+        tt_depth, tt_flag, tt_score, tt_move = tt[state_key]
+        
+        # Un-normalize mate scores from TT
+        if tt_score > FOUR_IN_A_ROW - 1000:
+            eval_score = tt_score - ply
+        elif tt_score < -FOUR_IN_A_ROW + 1000:
+            eval_score = tt_score + ply
+        else:
+            eval_score = tt_score
+
+        if tt_depth >= depth:
+            if tt_flag == 'EXACT':
+                return eval_score
+            elif tt_flag == 'LOWERBOUND':
+                a = max(a, eval_score)
+            elif tt_flag == 'UPPERBOUND':
+                b = min(b, eval_score)
+            if a >= b:
+                return eval_score
+
     moves = generate_moves()
+    if tt_move is not None and tt_move in moves:
+        moves.remove(tt_move)
+        moves.insert(0, tt_move)
     
     # cut off test
     if depth == 0 or len(moves) == 0:
         return eval_func()
 
     bestScore = float('inf')
+    bestMove = None
     for move in moves:
         # get score for this move
         make_move(move, HUMAN)
-        score = MAX(a, b, depth-1)
+        score = MAX(a, b, depth-1, ply+1)
         undo_move(move, HUMAN)
 
         # update values
-        bestScore = min(score, bestScore)        
+        if score < bestScore:
+            bestScore = score
+            bestMove = move
         b = min(b, bestScore)
 
         #purning or timeout
         if bestScore<= a or time() > end_time:
             break
+
+    if time() <= end_time and bestMove is not None:
+        if bestScore >= original_b:
+            flag = 'LOWERBOUND'
+        elif bestScore <= a:
+            flag = 'UPPERBOUND'
+        else:
+            flag = 'EXACT'
+            
+        store_score = bestScore
+        if store_score > FOUR_IN_A_ROW - 1000:
+            store_score += ply
+        elif store_score < -FOUR_IN_A_ROW + 1000:
+            store_score -= ply
+
+        tt[state_key] = (depth, flag, store_score, bestMove)
 
     return bestScore
 
@@ -224,57 +334,37 @@ def eval_func() -> int:
 
 # this function evalues and returns the score of `player`
 def score(player:int) -> int:
-    score = 0
-
-    # tally up scores horizontally and vertically
-    for direction, overflow in DIRECTIONS.values():
-        score += get_score(player, direction, overflow) 
+    opponent = 1 - player
+    p_board = bitboards[player]
+    o_board = bitboards[opponent]
     
-    #add bonus for central placements
-    score += bin(bitboards[player] & CENTER2X2_MASK).count('1')*CENTER_BONUS
-    score += bin(bitboards[player] & CENTER4X4RING_MASK).count('1')*CENTER_RING_BONUS
+    score_val = 0
+    winning_squares = set()
 
-    return score
-
-# this function returns the score of `player` in one direction
-# horizontal directions have overflow
-def get_score(player:int, direction:int, overflow:bool) -> int:
-    # calculate initialize values
-    unoccupied = ~(bitboards[AI] | bitboards[HUMAN]) & FULL_BOARD
-    p = bitboards[player]
-    L1 = L_SHIFT_MASK if overflow else FULL_BOARD
-    L2 = L_SHIFT2_MASK if overflow else FULL_BOARD
-    L3 = L_SHIFT3_MASK if overflow else FULL_BOARD
-    R1 = R_SHIFT_MASK if overflow else FULL_BOARD
-    # anchor bit is 1st bit of where the pattern appears
-    two_in_a_row = p & (p << 1*direction) & L1 
-    three_in_a_row = two_in_a_row & (p << 2*direction) & L2
+    for w in WINDOWS:
+        p_pieces = p_board & w
+        o_pieces = o_board & w
+        
+        # If the window is unblocked by the opponent
+        if o_pieces == 0 and p_pieces != 0:
+            count = bin(p_pieces).count('1')
+            if count == 3:
+                score_val += POTENTIAL_FOUR
+                winning_squares.add(w & ~p_pieces) # Track the exact empty square needed to win
+            elif count == 2:
+                score_val += POTENTIAL_THREE
+            elif count == 1:
+                score_val += 1000 # POTENTIAL_TWO
+                
+    # If there are multiple unique winning squares, it's an unstoppable fork (like an OPEN_THREE)
+    if len(winning_squares) >= 2:
+        score_val += 500000
     
-    # potential 4s
-    # unoccupied is shifted in the opposite direction because 
-    # it is shifting to where the anchor is instead of shifting the anchor to the unoccupied spot
-    p4_left = three_in_a_row & (unoccupied >> 1*direction) & R1     # [- X X X]
-    p4_right = three_in_a_row & (unoccupied << 3*direction) & L3    # [X X X -]
-    p4_gap = (((p & (unoccupied << 1*direction) & (p << 2*direction) & (p << 3*direction)) & L3) | #[X - X X]
-              ((p & (p << 1*direction) & (unoccupied << 2*direction) & (p << 3*direction)) & L3))  #[X X - X]
-    
-    # count up open 3s and potential fours
-    # (converts it to binary and counts the 1s to get total #)
-    open_3s = bin(p4_left & p4_right).count('1') # [- X X X -]
-    potential_fours = bin(p4_left).count('1')+bin(p4_right).count('1') - 2*open_3s + bin(p4_gap).count('1')
+    # add bonus for central placements
+    score_val += bin(p_board & CENTER2X2_MASK).count('1')*CENTER_BONUS
+    score_val += bin(p_board & CENTER4X4RING_MASK).count('1')*CENTER_RING_BONUS
 
-    # potential 3s
-    p3_left = two_in_a_row & (unoccupied >> 1*direction) & R1     # [- X X]
-    p3_right = two_in_a_row & (unoccupied << 2*direction) & L2    # [X X -]
-    p3_gap = ((p & (unoccupied << 1*direction) & (p << 2*direction) & L2) | #[X - X] 
-               p & (unoccupied << 1*direction) & (unoccupied << 2*direction) & (p << 3*direction) & L3)   # [X - - X]
-    open_2s = bin(p3_left & p3_right).count('1') # [- X X -]
-
-    # count up open 2s and potential threes
-    potential_threes = bin(p3_left).count('1')+bin(p3_right).count('1') - 2*open_2s + bin(p3_gap).count('1')
-
-    # multiply counts by the multipliers
-    return open_3s*OPEN_THREE + potential_fours*POTENTIAL_FOUR + open_2s*OPEN_TWO + potential_threes*POTENTIAL_THREE
+    return score_val
 
 # this function detects if there is a 4-in-a-row
 def isWin() -> int:
