@@ -1,0 +1,912 @@
+Match: New AI (X) vs Old AI (O)
+Think time: 5.0 seconds per move
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - - - - -
+C - - - - - - - -
+D - - - - - - - -
+E - - - - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played D4
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - - - - -
+C - - - - - - - -
+D - - - X - - - -
+E - - - - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played C3
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - - - - -
+C - - O - - - - -
+D - - - X - - - -
+E - - - - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played D5
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - - - - -
+C - - O - - - - -
+D - - - X X - - -
+E - - - - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played D3
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - - - - -
+C - - O - - - - -
+D - - O X X - - -
+E - - - - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played E3
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - - - - - - -
+C - - O - - - - -
+D - - O X X - - -
+E - - X - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played B3
+
+  1 2 3 4 5 6 7 8
+A - - - - - - - -
+B - - O - - - - -
+C - - O - - - - -
+D - - O X X - - -
+E - - X - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played A3
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B - - O - - - - -
+C - - O - - - - -
+D - - O X X - - -
+E - - X - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played B4
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B - - O O - - - -
+C - - O - - - - -
+D - - O X X - - -
+E - - X - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played B5
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B - - O O X - - -
+C - - O - - - - -
+D - - O X X - - -
+E - - X - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played C5
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B - - O O X - - -
+C - - O - O - - -
+D - - O X X - - -
+E - - X - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played C4
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B - - O O X - - -
+C - - O X O - - -
+D - - O X X - - -
+E - - X - - - - -
+F - - - - - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played F4
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B - - O O X - - -
+C - - O X O - - -
+D - - O X X - - -
+E - - X - - - - -
+F - - - O - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played E6
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B - - O O X - - -
+C - - O X O - - -
+D - - O X X - - -
+E - - X - - X - -
+F - - - O - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played B2
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B - O O O X - - -
+C - - O X O - - -
+D - - O X X - - -
+E - - X - - X - -
+F - - - O - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played B1
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B X O O O X - - -
+C - - O X O - - -
+D - - O X X - - -
+E - - X - - X - -
+F - - - O - - - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played F6
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B X O O O X - - -
+C - - O X O - - -
+D - - O X X - - -
+E - - X - - X - -
+F - - - O - O - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played F5
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B X O O O X - - -
+C - - O X O - - -
+D - - O X X - - -
+E - - X - - X - -
+F - - - O X O - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played E5
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B X O O O X - - -
+C - - O X O - - -
+D - - O X X - - -
+E - - X - O X - -
+F - - - O X O - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played E1
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B X O O O X - - -
+C - - O X O - - -
+D - - O X X - - -
+E X - X - O X - -
+F - - - O X O - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played D2
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B X O O O X - - -
+C - - O X O - - -
+D - O O X X - - -
+E X - X - O X - -
+F - - - O X O - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played E2
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B X O O O X - - -
+C - - O X O - - -
+D - O O X X - - -
+E X X X - O X - -
+F - - - O X O - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played E4
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B X O O O X - - -
+C - - O X O - - -
+D - O O X X - - -
+E X X X O O X - -
+F - - - O X O - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played D1
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B X O O O X - - -
+C - - O X O - - -
+D X O O X X - - -
+E X X X O O X - -
+F - - - O X O - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played C1
+
+  1 2 3 4 5 6 7 8
+A - - X - - - - -
+B X O O O X - - -
+C O - O X O - - -
+D X O O X X - - -
+E X X X O O X - -
+F - - - O X O - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played A2
+
+  1 2 3 4 5 6 7 8
+A - X X - - - - -
+B X O O O X - - -
+C O - O X O - - -
+D X O O X X - - -
+E X X X O O X - -
+F - - - O X O - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played A4
+
+  1 2 3 4 5 6 7 8
+A - X X O - - - -
+B X O O O X - - -
+C O - O X O - - -
+D X O O X X - - -
+E X X X O O X - -
+F - - - O X O - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played D7
+
+  1 2 3 4 5 6 7 8
+A - X X O - - - -
+B X O O O X - - -
+C O - O X O - - -
+D X O O X X - X -
+E X X X O O X - -
+F - - - O X O - -
+G - - - - - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played D6
+
+  1 2 3 4 5 6 7 8
+A - X X O - - - -
+B X O O O X - - -
+C O - O X O - - -
+D X O O X X O X -
+E X X X O O X - -
+F - - - O X O - -
+G - - - - - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played G4
+
+  1 2 3 4 5 6 7 8
+A - X X O - - - -
+B X O O O X - - -
+C O - O X O - - -
+D X O O X X O X -
+E X X X O O X - -
+F - - - O X O - -
+G - - - X - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played A6
+
+  1 2 3 4 5 6 7 8
+A - X X O - O - -
+B X O O O X - - -
+C O - O X O - - -
+D X O O X X O X -
+E X X X O O X - -
+F - - - O X O - -
+G - - - X - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played C7
+
+  1 2 3 4 5 6 7 8
+A - X X O - O - -
+B X O O O X - - -
+C O - O X O - X -
+D X O O X X O X -
+E X X X O O X - -
+F - - - O X O - -
+G - - - X - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played A7
+
+  1 2 3 4 5 6 7 8
+A - X X O - O O -
+B X O O O X - - -
+C O - O X O - X -
+D X O O X X O X -
+E X X X O O X - -
+F - - - O X O - -
+G - - - X - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played A5
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X - - -
+C O - O X O - X -
+D X O O X X O X -
+E X X X O O X - -
+F - - - O X O - -
+G - - - X - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played E7
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X - - -
+C O - O X O - X -
+D X O O X X O X -
+E X X X O O X O -
+F - - - O X O - -
+G - - - X - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played G3
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X - - -
+C O - O X O - X -
+D X O O X X O X -
+E X X X O O X O -
+F - - - O X O - -
+G - - X X - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played B6
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O - X -
+D X O O X X O X -
+E X X X O O X O -
+F - - - O X O - -
+G - - X X - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played C6
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X -
+D X O O X X O X -
+E X X X O O X O -
+F - - - O X O - -
+G - - X X - - - -
+H - - - - - - - -
+
+Old AI thinking...
+Old AI played G2
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X -
+D X O O X X O X -
+E X X X O O X O -
+F - - - O X O - -
+G - O X X - - - -
+H - - - - - - - -
+
+New AI thinking...
+New AI played H3
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X -
+D X O O X X O X -
+E X X X O O X O -
+F - - - O X O - -
+G - O X X - - - -
+H - - X - - - - -
+
+Old AI thinking...
+Old AI played F3
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X -
+D X O O X X O X -
+E X X X O O X O -
+F - - O O X O - -
+G - O X X - - - -
+H - - X - - - - -
+
+New AI thinking...
+New AI played F1
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X -
+D X O O X X O X -
+E X X X O O X O -
+F X - O O X O - -
+G - O X X - - - -
+H - - X - - - - -
+
+Old AI thinking...
+Old AI played G1
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X -
+D X O O X X O X -
+E X X X O O X O -
+F X - O O X O - -
+G O O X X - - - -
+H - - X - - - - -
+
+New AI thinking...
+New AI played H4
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X -
+D X O O X X O X -
+E X X X O O X O -
+F X - O O X O - -
+G O O X X - - - -
+H - - X X - - - -
+
+Old AI thinking...
+Old AI played H2
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X -
+D X O O X X O X -
+E X X X O O X O -
+F X - O O X O - -
+G O O X X - - - -
+H - O X X - - - -
+
+New AI thinking...
+New AI played E8
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X -
+D X O O X X O X -
+E X X X O O X O X
+F X - O O X O - -
+G O O X X - - - -
+H - O X X - - - -
+
+Old AI thinking...
+Old AI played G5
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X -
+D X O O X X O X -
+E X X X O O X O X
+F X - O O X O - -
+G O O X X O - - -
+H - O X X - - - -
+
+New AI thinking...
+New AI played G6
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X -
+D X O O X X O X -
+E X X X O O X O X
+F X - O O X O - -
+G O O X X O X - -
+H - O X X - - - -
+
+Old AI thinking...
+Old AI played C8
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X O
+D X O O X X O X -
+E X X X O O X O X
+F X - O O X O - -
+G O O X X O X - -
+H - O X X - - - -
+
+New AI thinking...
+New AI played H7
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O - -
+C O - O X O X X O
+D X O O X X O X -
+E X X X O O X O X
+F X - O O X O - -
+G O O X X O X - -
+H - O X X - - X -
+
+Old AI thinking...
+Old AI played B7
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O O -
+C O - O X O X X O
+D X O O X X O X -
+E X X X O O X O X
+F X - O O X O - -
+G O O X X O X - -
+H - O X X - - X -
+
+New AI thinking...
+New AI played F8
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O O -
+C O - O X O X X O
+D X O O X X O X -
+E X X X O O X O X
+F X - O O X O - X
+G O O X X O X - -
+H - O X X - - X -
+
+Old AI thinking...
+Old AI played D8
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O O -
+C O - O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X - O O X O - X
+G O O X X O X - -
+H - O X X - - X -
+
+New AI thinking...
+New AI played H8
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O O -
+C O - O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X - O O X O - X
+G O O X X O X - -
+H - O X X - - X X
+
+Old AI thinking...
+Old AI played G8
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O -
+B X O O O X O O -
+C O - O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X - O O X O - X
+G O O X X O X - O
+H - O X X - - X X
+
+New AI thinking...
+New AI played A8
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O X
+B X O O O X O O -
+C O - O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X - O O X O - X
+G O O X X O X - O
+H - O X X - - X X
+
+Old AI thinking...
+Old AI played C2
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O X
+B X O O O X O O -
+C O O O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X - O O X O - X
+G O O X X O X - O
+H - O X X - - X X
+
+New AI thinking...
+New AI played H5
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O X
+B X O O O X O O -
+C O O O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X - O O X O - X
+G O O X X O X - O
+H - O X X X - X X
+
+Old AI thinking...
+Old AI played H6
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O X
+B X O O O X O O -
+C O O O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X - O O X O - X
+G O O X X O X - O
+H - O X X X O X X
+
+New AI thinking...
+New AI played F2
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O X
+B X O O O X O O -
+C O O O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X X O O X O - X
+G O O X X O X - O
+H - O X X X O X X
+
+Old AI thinking...
+Old AI played F7
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O X
+B X O O O X O O -
+C O O O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X X O O X O O X
+G O O X X O X - O
+H - O X X X O X X
+
+New AI thinking...
+New AI played G7
+
+  1 2 3 4 5 6 7 8
+A - X X O X O O X
+B X O O O X O O -
+C O O O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X X O O X O O X
+G O O X X O X X O
+H - O X X X O X X
+
+Old AI thinking...
+Old AI played A1
+
+  1 2 3 4 5 6 7 8
+A O X X O X O O X
+B X O O O X O O -
+C O O O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X X O O X O O X
+G O O X X O X X O
+H - O X X X O X X
+
+New AI thinking...
+New AI played B8
+
+  1 2 3 4 5 6 7 8
+A O X X O X O O X
+B X O O O X O O X
+C O O O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X X O O X O O X
+G O O X X O X X O
+H - O X X X O X X
+
+Old AI thinking...
+Old AI played H1
+
+  1 2 3 4 5 6 7 8
+A O X X O X O O X
+B X O O O X O O X
+C O O O X O X X O
+D X O O X X O X O
+E X X X O O X O X
+F X X O O X O O X
+G O O X X O X X O
+H O O X X X O X X
+
+Tie!
+
+--- Move List for Analyzer ---
+New AI played D4
+Old AI played C3
+New AI played D5
+Old AI played D3
+New AI played E3
+Old AI played B3
+New AI played A3
+Old AI played B4
+New AI played B5
+Old AI played C5
+New AI played C4
+Old AI played F4
+New AI played E6
+Old AI played B2
+New AI played B1
+Old AI played F6
+New AI played F5
+Old AI played E5
+New AI played E1
+Old AI played D2
+New AI played E2
+Old AI played E4
+New AI played D1
+Old AI played C1
+New AI played A2
+Old AI played A4
+New AI played D7
+Old AI played D6
+New AI played G4
+Old AI played A6
+New AI played C7
+Old AI played A7
+New AI played A5
+Old AI played E7
+New AI played G3
+Old AI played B6
+New AI played C6
+Old AI played G2
+New AI played H3
+Old AI played F3
+New AI played F1
+Old AI played G1
+New AI played H4
+Old AI played H2
+New AI played E8
+Old AI played G5
+New AI played G6
+Old AI played C8
+New AI played H7
+Old AI played B7
+New AI played F8
+Old AI played D8
+New AI played H8
+Old AI played G8
+New AI played A8
+Old AI played C2
+New AI played H5
+Old AI played H6
+New AI played F2
+Old AI played F7
+New AI played G7
+Old AI played A1
+New AI played B8
+Old AI played H1

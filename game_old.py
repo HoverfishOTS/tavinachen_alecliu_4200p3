@@ -19,12 +19,13 @@ HUMAN = 1
 # score values; modify these for different AI behavior
 FOUR_IN_A_ROW = 9999999999
 OPEN_THREE = 100000
-POTENTIAL_FOUR = 15000
-OPEN_TWO = 8000
-POTENTIAL_THREE = 5000
-CENTER_BONUS = 10
-CENTER_RING_BONUS = 5
-FEAR_FACTOR = 1.5 # higher value = more defensive
+POTENTIAL_FOUR = 50000
+SPLIT_TWO = 10000
+OPEN_TWO = 5000
+POTENTIAL_THREE = 1000
+CENTER_BONUS = 0
+CENTER_RING_BONUS = 0
+FEAR_FACTOR = 1.3 # higher value = more defensive
 
 # Bitboard selection masks
 FULL_BOARD = 0xFFFFFFFFFFFFFFFF # sets all 64 bits into 1
@@ -64,7 +65,7 @@ def start_game(humanFirst:bool, thinkTimeInSeconds:int) -> None:
     print_board()
 
     if humanFirst:
-        FEAR_FACTOR = 2 # AI plays more defensively if the human plays first
+        FEAR_FACTOR = 1.5 # AI plays more defensively if the human plays first
         human_move()
     
     # continue until game is over
@@ -231,8 +232,8 @@ def score(player:int) -> int:
         score += get_score(player, direction, overflow) 
     
     #add bonus for central placements
-    score += bin(bitboards[player] & CENTER2X2_MASK).count('1')*CENTER_BONUS
-    score += bin(bitboards[player] & CENTER4X4RING_MASK).count('1')*CENTER_RING_BONUS
+    score += (bitboards[player] & CENTER2X2_MASK).bit_count()*CENTER_BONUS
+    score += (bitboards[player] & CENTER4X4RING_MASK).bit_count()*CENTER_RING_BONUS
 
     return score
 
@@ -246,35 +247,39 @@ def get_score(player:int, direction:int, overflow:bool) -> int:
     L2 = L_SHIFT2_MASK if overflow else FULL_BOARD
     L3 = L_SHIFT3_MASK if overflow else FULL_BOARD
     R1 = R_SHIFT_MASK if overflow else FULL_BOARD
-    # anchor bit is 1st bit of where the pattern appears
+    # anchor bit is the right most bit of where the pattern appears
     two_in_a_row = p & (p << 1*direction) & L1 
     three_in_a_row = two_in_a_row & (p << 2*direction) & L2
     
     # potential 4s
     # unoccupied is shifted in the opposite direction because 
     # it is shifting to where the anchor is instead of shifting the anchor to the unoccupied spot
-    p4_left = three_in_a_row & (unoccupied >> 1*direction) & R1     # [- X X X]
-    p4_right = three_in_a_row & (unoccupied << 3*direction) & L3    # [X X X -]
-    p4_gap = (((p & (unoccupied << 1*direction) & (p << 2*direction) & (p << 3*direction)) & L3) | #[X - X X]
-              ((p & (p << 1*direction) & (unoccupied << 2*direction) & (p << 3*direction)) & L3))  #[X X - X]
+    p4_right = three_in_a_row & (unoccupied >> 1*direction) & R1     # [X X X -]
+    p4_left = three_in_a_row & (unoccupied << 3*direction) & L3    # [- X X X]
+    p4_gap = (((p & (unoccupied << 1*direction) & (p << 2*direction) & (p << 3*direction)) & L3) | #[X X - X]
+              ((p & (p << 1*direction) & (unoccupied << 2*direction) & (p << 3*direction)) & L3))  #[X - X X]
     
     # count up open 3s and potential fours
     # (converts it to binary and counts the 1s to get total #)
-    open_3s = bin(p4_left & p4_right).count('1') # [- X X X -]
-    potential_fours = bin(p4_left).count('1')+bin(p4_right).count('1') - 2*open_3s + bin(p4_gap).count('1')
+    open_3s = (p4_left & p4_right).bit_count() # [- X X X -]
+    potential_fours = (p4_left).bit_count() + (p4_right).bit_count() - 2*open_3s + (p4_gap).bit_count()
 
     # potential 3s
-    p3_left = two_in_a_row & (unoccupied >> 1*direction) & R1     # [- X X]
-    p3_right = two_in_a_row & (unoccupied << 2*direction) & L2    # [X X -]
-    p3_gap = ((p & (unoccupied << 1*direction) & (p << 2*direction) & L2) | #[X - X] 
-               p & (unoccupied << 1*direction) & (unoccupied << 2*direction) & (p << 3*direction) & L3)   # [X - - X]
-    open_2s = bin(p3_left & p3_right).count('1') # [- X X -]
+    p3_right = unoccupied & (unoccupied << 1*direction) & (p << 2*direction) & (p << 3*direction) & L3   # [X X - -]
+    p3_left = p & (p << 1*direction) & (unoccupied << 2*direction) & (unoccupied << 3*direction) & L3  # [- - X X]
+    p3_mid_gap = p & (unoccupied << 1*direction) & (unoccupied << 2*direction) & (p << 3*direction) & L3 # [X - - X]
+    p3_gap_pattern = p & (unoccupied << 1*direction) & (p << 2*direction) & L2 # [X - X]
+    p3_gap_right = p3_gap_pattern & (unoccupied >> 1*direction) & R1 # [X - X -]
+    p3_gap_left = p3_gap_pattern & (unoccupied << 3*direction) & L3 # [- X - X]
 
-    # count up open 2s and potential threes
-    potential_threes = bin(p3_left).count('1')+bin(p3_right).count('1') - 2*open_2s + bin(p3_gap).count('1')
+    # tally up
+    split_2s = (p3_gap_left & p3_gap_right).bit_count() # [- X - X -]
+    open_2s = (unoccupied & (p << 1*direction) & (p << 2*direction) & (unoccupied << 3*direction) & L3).bit_count() # [- X X -]
+    potential_threes = ((p3_left).bit_count() + (p3_right).bit_count() + (p3_mid_gap).bit_count() +
+                        (p3_gap_left).bit_count() + (p3_gap_right).bit_count() - 2*split_2s)
 
     # multiply counts by the multipliers
-    return open_3s*OPEN_THREE + potential_fours*POTENTIAL_FOUR + open_2s*OPEN_TWO + potential_threes*POTENTIAL_THREE
+    return open_3s*OPEN_THREE + potential_fours*POTENTIAL_FOUR + split_2s*SPLIT_TWO + open_2s*OPEN_TWO + potential_threes*POTENTIAL_THREE
 
 # this function detects if there is a 4-in-a-row
 def isWin() -> int:
